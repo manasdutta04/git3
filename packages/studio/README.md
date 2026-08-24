@@ -37,6 +37,29 @@ await users.remove(ada!._id);
 npm install @git3db/db
 ```
 
+## Update from an older version
+
+`npx` and npm can keep an old copy. To get the latest:
+
+```bash
+# CLI / Studio
+npx --yes @git3db/studio@latest studio
+npx --yes @git3db/studio@latest serve
+
+# In a project that already depends on the packages
+npm install @git3db/db@latest
+npm install -D @git3db/studio@latest
+```
+
+Check what you have:
+
+```bash
+npm view @git3db/db version
+npm ls @git3db/db
+```
+
+If `npx` still runs an old build, clear its cache once: `npx clear-npx-cache`, then run `@latest` again.
+
 ## Use it from a website (local)
 
 Token stays in the git3 process — never put it in browser JavaScript.
