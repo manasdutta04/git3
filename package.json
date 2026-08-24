@@ -4,7 +4,9 @@
   "scripts": {
     "build": "pnpm -r build",
     "dev": "pnpm --filter @git3db/db dev",
-    "studio": "pnpm --filter @git3db/studio build && node packages/studio/dist/bin.mjs studio"
+    "studio": "pnpm --filter @git3db/studio build && node packages/studio/dist/bin.mjs studio",
+    "web": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

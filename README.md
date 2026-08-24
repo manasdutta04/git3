@@ -2,6 +2,9 @@
 
 **Free MongoDB-like database on GitHub.** No servers. Your data stays in a private repo you own.
 
+**Marketing site (Vercel):** deploy the `web/` folder — Root Directory = `web`.  
+**Product (npm):** `npx git3 studio` and `@git3db/db` — Studio UI matches the landing look.
+
 ## Start here
 
 ```bash
