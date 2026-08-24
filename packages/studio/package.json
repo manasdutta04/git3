@@ -1,6 +1,6 @@
 {
   "name": "@git3db/studio",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Localhost Studio GUI for @git3db/db",
   "license": "MIT",
   "repository": {
