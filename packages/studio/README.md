@@ -110,7 +110,7 @@ See collection `schema` options, `GIT3_ENCRYPTION_KEY`, and `db.import` / `db.ex
 
 ## Limits
 
-git3 is free (MIT). GitHub allows about 5,000 API calls/hour. Best for MVPs, side projects, and internal tools — not high-traffic production. Deletes commit through the Git tree API and are durable as of `0.1.1`.
+git3 is free (MIT). GitHub allows about 5,000 API calls/hour. Best for MVPs, side projects, and internal tools — not high-traffic production. Deletes commit through the Git tree API and are durable as of `0.1.2`.
 
 ## License
 
