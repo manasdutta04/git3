@@ -1,123 +1,67 @@
 # git3
 
-**Free MongoDB-like database on GitHub.**
+**Free MongoDB-like database on GitHub.** No servers. Your data stays in a private repo you own.
 
-git3 turns a private GitHub repository into your database — collections, documents, queries — with zero infrastructure cost. MIT open source.
+## Use it
 
 ```bash
-npm install git3
+npx git3 studio
 ```
 
-## 3-step setup
+The browser opens. Paste:
 
-1. **Create a GitHub PAT** at [github.com/settings/tokens](https://github.com/settings/tokens)  
-   - Classic: `repo` scope  
-   - Fine-grained: **Contents** Read & Write
+1. A GitHub token ([create one](https://github.com/settings/tokens) with the `repo` scope)
+2. Your GitHub username
+3. A repo name (`my-app-db` is fine)
 
-2. **Add to `.env`:**
+Click **Connect**. git3 writes a local `.env` and creates the private repo if it is missing. Then you can browse collections in Studio.
 
-```env
-GIT3_TOKEN=ghp_xxxxxxxxxxxx
-GIT3_OWNER=your-username
-GIT3_REPO=my-app-db
-```
+The token never leaves your machine.
 
-3. **Use in your app:**
+## Use it in your app
+
+Same `.env`. Then:
 
 ```ts
 import { Git3 } from 'git3';
 
-const db = new Git3(); // reads env; auto-creates private repo if missing
-
+const db = new Git3();
 const users = db.collection('users');
 
-await users.insertOne({ name: 'Ada', email: 'ada@example.com' });
-const ada = await users.findOne({ email: 'ada@example.com' });
-await users.updateOne({ email: 'ada@example.com' }, { $set: { plan: 'pro' } });
+await users.add({ name: 'Ada', email: 'ada@example.com' });
+const ada = await users.get('...');        // by _id
+const found = await users.findOne({ email: 'ada@example.com' });
+await users.set(ada._id, { plan: 'pro' });
+await users.remove(ada._id);
 ```
 
-Your **code repo** and **data repo** stay separate. Data is stored as JSON in the GitHub repo you configure.
+Install for apps: `npm install git3`. Studio: `npm install git3 git3-studio`.
 
-## Studio (Compass-like GUI)
+## Advanced
 
-```bash
-npm install git3 git3-studio
-npx git3 studio
-```
+MongoDB-style methods still work: `insertOne`, `findOne`, `updateOne({ $set })`, `find().sort().limit().toArray()`.
 
-Opens `http://localhost:3847` — browse collections, edit documents, view KV keys. Runs locally only; no signup.
-
-## API overview
-
-| MongoDB-style | git3 |
-|---------------|------|
-| `insertOne(doc)` | Create document (auto `_id`) |
-| `insertMany(docs)` | Batch insert (single commit) |
-| `findOne(filter)` | Find first match |
-| `find(filter).sort().limit().toArray()` | Query with cursor |
-| `updateOne(filter, { $set })` | Partial update |
-| `deleteOne(filter)` | Delete document |
-| `db.kv()` | Key-value store |
-| `db.storage()` | File upload/download |
-| `db.health()` | Connection + rate limit |
+| Method | Meaning |
+|--------|---------|
+| `add` / `insertOne` | Create |
+| `get` / `findById` | Read by id |
+| `find` / `findOne` | Query |
+| `set` / `updateOne` | Update fields |
+| `remove` / `deleteOne` | Delete |
+| `db.kv()` | Key-value |
+| `db.storage()` | Files |
 
 ### Query operators
 
 `$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`, `$in`, `$nin`, `$exists`, `$contains`, `$startsWith`, `$endsWith`
 
-### Schema validation
+### Schema, encryption, import
 
-```ts
-import { Git3, Schema } from 'git3';
+See collection `schema` options, `GIT3_ENCRYPTION_KEY`, and `db.import` / `db.export`.
 
-const users = db.collection('users', {
-  schema: {
-    name: Schema.string().required().minLength(2).build(),
-    email: Schema.string().email().required().build(),
-    plan: Schema.string().enum(['free', 'pro']).default('free').build(),
-  },
-});
-```
+## Limits
 
-### Encryption (optional)
-
-```env
-GIT3_ENCRYPTION_ENABLED=true
-GIT3_ENCRYPTION_KEY=your-64-char-hex-key
-```
-
-## Data layout (your GitHub repo)
-
-```
-my-app-db/
-├── collections/
-│   └── users/
-│       ├── _index.json
-│       └── {id}.json
-├── kv/store.json
-└── storage/
-```
-
-## Free — with honest limits
-
-| Free | Limits |
-|------|--------|
-| git3 is MIT, no billing | 5,000 GitHub API calls/hour |
-| GitHub stores your data | ~200–500ms per uncached read |
-| Full git history on every write | Best for MVPs & side projects |
-
-## Import / export
-
-```ts
-await db.import('users', './backup/users.json');
-await db.export('users', './backup/users.csv', { format: 'csv' });
-```
-
-## When to use git3
-
-**Good for:** MVPs, hackathons, side projects, internal tools, serverless apps with low traffic.
-
-**Not for:** High-traffic production, sub-10ms latency, complex aggregations.
+git3 is free (MIT). GitHub allows about 5,000 API calls/hour. Best for MVPs, side projects, and internal tools — not high-traffic production.
 
 ## License
 

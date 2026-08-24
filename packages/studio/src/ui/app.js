@@ -34,6 +34,10 @@ async function api(path, options = {}) {
     ...options,
   });
   const data = await res.json().catch(() => ({}));
+  if (data.needsSetup) {
+    showConnect();
+    throw new Error('Connect GitHub first');
+  }
   if (!res.ok) throw new Error(data.error || res.statusText);
   return data;
 }
@@ -316,6 +320,70 @@ async function viewStorage() {
   }
 }
 
+function showConnect(prefill) {
+  $('connect').classList.remove('hidden');
+  if (prefill?.owner) $('connect-owner').value = prefill.owner;
+  if (prefill?.repo) $('connect-repo').value = prefill.repo;
+  $('connect-token').value = '';
+  $('connect-token').focus();
+}
+
+function hideConnect() {
+  $('connect').classList.add('hidden');
+  $('connect-error').classList.add('hidden');
+}
+
+async function bootWorkspace() {
+  hideConnect();
+  await loadHealth();
+  await loadCollections();
+}
+
+async function boot() {
+  try {
+    const status = await api('/status');
+    if (!status.configured) {
+      showConnect();
+      return;
+    }
+    await bootWorkspace();
+  } catch {
+    showConnect();
+  }
+}
+
+$('connect-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const errEl = $('connect-error');
+  const submit = $('connect-submit');
+  errEl.classList.add('hidden');
+  submit.disabled = true;
+  submit.textContent = 'Connecting…';
+  try {
+    await api('/setup', {
+      method: 'POST',
+      body: JSON.stringify({
+        token: $('connect-token').value.trim(),
+        owner: $('connect-owner').value.trim(),
+        repo: $('connect-repo').value.trim() || 'my-app-db',
+      }),
+    });
+    toast('Connected');
+    await bootWorkspace();
+  } catch (err) {
+    errEl.classList.remove('hidden');
+    errEl.textContent = err.message;
+    errEl.style.borderColor = 'var(--rose)';
+  } finally {
+    submit.disabled = false;
+    submit.textContent = 'Connect';
+  }
+});
+
+$('reconnect').addEventListener('click', () => {
+  showConnect(lastHealth || {});
+});
+
 $('refresh').addEventListener('click', async () => {
   await loadHealth();
   await loadCollections();
@@ -349,5 +417,4 @@ $('new-collection').addEventListener('click', () => {
   toast('Collection ready — add a document to create it on GitHub');
 });
 
-loadHealth();
-loadCollections();
+boot();

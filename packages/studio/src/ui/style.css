@@ -362,6 +362,50 @@ tbody tr:hover { background: rgba(212, 120, 58, 0.08); }
 .kv-card .k { font-family: "IBM Plex Mono", monospace; color: var(--copper); }
 .kv-card .v { grid-column: 1 / -1; color: var(--muted); font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; }
 
+.connect {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(900px 400px at 10% 0%, rgba(212, 120, 58, 0.2), transparent 55%),
+    rgba(12, 10, 9, 0.92);
+}
+
+.connect-card {
+  width: min(28rem, 100%);
+  padding: 1.6rem 1.5rem 1.4rem;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 0.7rem;
+}
+
+.connect-card h2 {
+  margin: 0;
+  font-family: Fraunces, serif;
+  font-size: 1.7rem;
+  font-weight: 500;
+}
+
+.connect-copy { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.45; }
+
+.connect-card label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.connect-card input { width: 100%; }
+.connect-card a { color: var(--copper); }
+.connect-card .primary { margin-top: 0.3rem; width: 100%; }
+
 .hidden { display: none !important; }
 
 .toast {

@@ -17,9 +17,10 @@ pnpm build
 ## Run Studio locally
 
 ```bash
-# Set GIT3_TOKEN, GIT3_OWNER, GIT3_REPO in .env first
 pnpm studio
 ```
+
+If `.env` is missing, the GUI Connect screen asks for your GitHub token.
 
 ## Conventions
 

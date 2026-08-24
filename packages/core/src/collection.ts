@@ -358,4 +358,20 @@ export class Collection<T extends Git3Document = Git3Document> {
   getCollectionName(): string {
     return this.name;
   }
+
+  add(doc: Partial<T>): Promise<T> {
+    return this.insertOne(doc);
+  }
+
+  get(id: string): Promise<T | null> {
+    return this.findById(id);
+  }
+
+  set(id: string, fields: Partial<T>): Promise<T | null> {
+    return this.updateOne({ _id: id } as Filter<T>, { $set: fields });
+  }
+
+  remove(id: string): Promise<boolean> {
+    return this.deleteOne({ _id: id } as Filter<T>);
+  }
 }

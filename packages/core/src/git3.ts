@@ -33,6 +33,13 @@ export class Git3 {
   private kvStore: KVStore | null = null;
   private storageInstance: FileStorage | null = null;
 
+  static isConfigured(config: Git3Config = {}): boolean {
+    const token = config.token ?? process.env.GIT3_TOKEN;
+    const owner = config.owner ?? process.env.GIT3_OWNER;
+    const repo = config.repo ?? process.env.GIT3_REPO;
+    return Boolean(token && owner && repo);
+  }
+
   constructor(config: Git3Config = {}) {
     this.config = this.resolveConfig(config);
     this.logger = new Logger(this.config.debug);
