@@ -70,6 +70,18 @@ export function createRoutes(session: StudioSession) {
       }
     },
 
+    documentHistory: async (req: Request, res: Response) => {
+      const db = needsDb(session, res);
+      if (!db) return;
+      try {
+        const col = db.collection(req.params.name!);
+        const history = await col.history(req.params.id!);
+        res.json({ history });
+      } catch (err) {
+        res.status(500).json({ error: (err as Error).message });
+      }
+    },
+
     createDocument: async (req: Request, res: Response) => {
       const db = needsDb(session, res);
       if (!db) return;

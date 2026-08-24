@@ -20,7 +20,13 @@ pnpm build
 pnpm studio
 ```
 
-If `.env` is missing, the GUI Connect screen asks for your GitHub token.
+If `.env` is missing, the GUI opens Connect with GitHub (or a personal access token fallback).
+
+```bash
+pnpm --filter @git3db/studio exec node dist/bin.mjs serve
+```
+
+Serves the same API without the UI (for local HTML templates).
 
 ## Conventions
 

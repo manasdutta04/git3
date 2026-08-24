@@ -12,6 +12,7 @@ import type {
   BatchOperation,
   GitHubFileContent,
   GitHubRateLimit,
+  PathCommit,
   ResolvedConfig,
 } from './types.js';
 
@@ -152,6 +153,11 @@ export class GitHubClient {
       });
       if (!create.ok) {
         const body = await create.text();
+        if (create.status === 403) {
+          throw new AuthenticationError(
+            'This token cannot create repositories. Use Connect with GitHub, a classic token with the repo scope, or create the repo on GitHub first.'
+          );
+        }
         throw this.wrapHttpError(create.status, body || create.statusText);
       }
       this.logger.info(`Repository "${this.config.repo}" created`);
@@ -373,13 +379,14 @@ export class GitHubClient {
       tree: Array<{ path?: string; mode?: string; type?: string; sha?: string }>;
     };
 
+    // Blobs only: recursive trees include parent `tree` entries that still
+    // contain deleted paths, which would restore files after a "delete".
     const existingEntries = fullTree.tree
-      .filter((entry) => entry.path && !deletePaths.has(entry.path))
-      .filter((entry) => entry.type === 'blob' || entry.type === 'tree')
+      .filter((entry) => entry.path && entry.type === 'blob' && !deletePaths.has(entry.path))
       .map((entry) => ({
         path: entry.path!,
-        mode: entry.mode as '100644' | '100755' | '040000',
-        type: entry.type as 'blob' | 'tree',
+        mode: (entry.mode as '100644' | '100755') || '100644',
+        type: 'blob' as const,
         sha: entry.sha!,
       }));
 
@@ -524,6 +531,30 @@ export class GitHubClient {
     if (!response.ok) throw this.wrapHttpError(response.status, await response.text());
     const data = (await response.json()) as { content: string };
     return Buffer.from(data.content, 'base64').toString('utf-8');
+  }
+
+  async listPathCommits(path: string, limit = 20): Promise<PathCommit[]> {
+    await this.ensureReady();
+    const response = await this.request(
+      `/repos/${this.config.owner}/${this.config.repo}/commits?path=${encodeURIComponent(path)}&per_page=${limit}&sha=${encodeURIComponent(this.config.branch)}`
+    );
+    if (!response.ok) throw this.wrapHttpError(response.status, await response.text());
+    const data = (await response.json()) as Array<{
+      sha: string;
+      html_url: string;
+      commit: {
+        message: string;
+        author?: { name?: string; date?: string };
+        committer?: { name?: string; date?: string };
+      };
+    }>;
+    return data.map((entry) => ({
+      sha: entry.sha,
+      message: entry.commit.message.split('\n')[0] || entry.commit.message,
+      date: entry.commit.author?.date || entry.commit.committer?.date || '',
+      author: entry.commit.author?.name || entry.commit.committer?.name || 'unknown',
+      url: entry.html_url,
+    }));
   }
 
   async getRateLimit(): Promise<GitHubRateLimit> {

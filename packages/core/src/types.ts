@@ -164,6 +164,14 @@ export interface BatchOperation {
   binary?: boolean;
 }
 
+export interface PathCommit {
+  sha: string;
+  message: string;
+  date: string;
+  author: string;
+  url: string;
+}
+
 export interface Git3Document {
   _id: string;
   [key: string]: unknown;

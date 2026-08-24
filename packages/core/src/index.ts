@@ -29,4 +29,5 @@ export type {
   ImportOptions,
   ExportOptions,
   StorageFileInfo,
+  PathCommit,
 } from './types.js';

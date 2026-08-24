@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>git3 notices</title>
+    <style>
+      :root {
+        --ink: #1b1b1b;
+        --mute: #5c5c5c;
+        --line: #d7d7d7;
+        --bg: #f6f5f3;
+        --accent: #0f766e;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--ink);
+        background: var(--bg);
+      }
+      main {
+        width: min(40rem, calc(100% - 2rem));
+        margin: 2rem auto 4rem;
+      }
+      h1 { font-size: 1.8rem; margin: 0 0 0.4rem; }
+      .lede { color: var(--mute); margin: 0 0 1.5rem; }
+      form, .notice {
+        border-top: 1px solid var(--line);
+        padding: 1rem 0;
+      }
+      label { display: grid; gap: 0.3rem; margin-bottom: 0.75rem; font-size: 0.85rem; }
+      input, textarea {
+        width: 100%;
+        padding: 0.55rem 0.65rem;
+        border: 1px solid var(--line);
+        background: #fff;
+        font: inherit;
+      }
+      button {
+        border: 0;
+        background: var(--ink);
+        color: #fff;
+        padding: 0.55rem 0.9rem;
+        cursor: pointer;
+      }
+      .status { color: var(--mute); font-size: 0.85rem; margin-left: 0.75rem; }
+      .notice strong { display: block; }
+      .notice time { color: var(--mute); font-size: 0.8rem; }
+      .notice p { margin: 0.45rem 0 0; white-space: pre-wrap; }
+      code { font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>git3 notices</h1>
+      <p class="lede">
+        Local HTML talking to <code>npx git3 serve</code>. The token stays in the git3 process — never in this page.
+      </p>
+      <p class="lede" id="where">Connecting…</p>
+
+      <form id="compose">
+        <label>
+          Name
+          <input id="author" required maxlength="80" placeholder="Ada" />
+        </label>
+        <label>
+          Note
+          <textarea id="body" required maxlength="2000" rows="4" placeholder="Hello from the website"></textarea>
+        </label>
+        <button type="submit">Write to repo</button>
+        <span class="status" id="status"></span>
+      </form>
+
+      <section id="feed"></section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -20,6 +20,7 @@ import type {
   Filter,
   Git3Document,
   IndexData,
+  PathCommit,
   SchemaDefinition,
   UpdateDoc,
 } from './types.js';
@@ -373,5 +374,9 @@ export class Collection<T extends Git3Document = Git3Document> {
 
   remove(id: string): Promise<boolean> {
     return this.deleteOne({ _id: id } as Filter<T>);
+  }
+
+  history(id: string): Promise<PathCommit[]> {
+    return this.github.listPathCommits(this.docPath(id));
   }
 }

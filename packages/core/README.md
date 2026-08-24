@@ -2,34 +2,15 @@
 
 **Free MongoDB-like database on GitHub.** No servers. Your data stays in a private repo you own.
 
-## Install
-
-```bash
-npm install @git3db/db
-```
-
-Studio (optional):
-
-```bash
-npm install -D @git3db/studio
-npx git3 studio
-```
-
-## Use Studio
+## Start here
 
 ```bash
 npx git3 studio
 ```
 
-The browser opens. Paste:
+The browser opens at `http://localhost:3847`. Click **Connect with GitHub**, approve access, then pick or create a private data repo. git3 writes a local `.env`. The token never leaves your machine.
 
-1. A GitHub token ([create one](https://github.com/settings/tokens) with the `repo` scope)
-2. Your GitHub username
-3. A repo name (`my-app-db` is fine)
-
-Click **Connect**. git3 writes a local `.env` and creates the private repo if it is missing. Then you can browse collections in Studio.
-
-The token never leaves your machine.
+Prefer a token? Use **Use a personal access token instead** in Studio (classic token with the `repo` scope).
 
 ## Use it in your app
 
@@ -47,6 +28,29 @@ const found = await users.findOne({ email: 'ada@example.com' });
 await users.set(ada!._id, { plan: 'pro' });
 await users.remove(ada!._id);
 ```
+
+```bash
+npm install @git3db/db
+```
+
+## Use it from a website (local)
+
+Token stays in the git3 process — never put it in browser JavaScript.
+
+```bash
+npx git3 serve
+```
+
+Then open [`templates/web/index.html`](templates/web/index.html) (or any local page that calls `http://127.0.0.1:3850/api/...`).
+
+## Studio
+
+```bash
+npm install -D @git3db/studio
+npx git3 studio
+```
+
+Browse collections, key-value, files, and document **history** (git commits for each JSON file).
 
 ## Advanced
 
@@ -69,8 +73,6 @@ await db.storage().upload('avatars/ada.png', pngBuffer);
 const bytes = await db.storage().download('avatars/ada.png');
 ```
 
-In Studio, open **Files** to upload, preview images, and delete (10MB max).
-
 ### Query operators
 
 `$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`, `$in`, `$nin`, `$exists`, `$contains`, `$startsWith`, `$endsWith`
@@ -79,9 +81,13 @@ In Studio, open **Files** to upload, preview images, and delete (10MB max).
 
 See collection `schema` options, `GIT3_ENCRYPTION_KEY`, and `db.import` / `db.export`.
 
+### Connect with GitHub (OAuth)
+
+Studio uses GitHub Device Flow. Set `GIT3_GITHUB_CLIENT_ID` to your [OAuth App](https://github.com/settings/developers) client ID (scope `repo`). Without it, use a personal access token in Studio.
+
 ## Limits
 
-git3 is free (MIT). GitHub allows about 5,000 API calls/hour. Best for MVPs, side projects, and internal tools — not high-traffic production.
+git3 is free (MIT). GitHub allows about 5,000 API calls/hour. Best for MVPs, side projects, and internal tools — not high-traffic production. Deletes commit through the Git tree API and are durable as of `0.1.1`.
 
 ## License
 
