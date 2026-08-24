@@ -1,5 +1,5 @@
 {
-  "name": "git3",
+  "name": "@git3db/db",
   "version": "0.1.0",
   "description": "Free MongoDB-like database backed by a private GitHub repo",
   "license": "MIT",
@@ -35,6 +35,9 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "engines": {
     "node": ">=18.0.0"

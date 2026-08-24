@@ -11,8 +11,8 @@ pnpm build
 
 ## Project structure
 
-- `packages/core` — `git3` npm library
-- `packages/studio` — `git3-studio` CLI + localhost GUI
+- `packages/core` — `@git3db/db` npm library
+- `packages/studio` — `@git3db/studio` CLI + localhost GUI
 
 ## Run Studio locally
 

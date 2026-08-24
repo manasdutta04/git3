@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "build": "pnpm -r build",
-    "dev": "pnpm --filter git3 dev",
-    "studio": "pnpm --filter git3-studio build && node packages/studio/dist/bin.mjs studio"
+    "dev": "pnpm --filter @git3db/db dev",
+    "studio": "pnpm --filter @git3db/studio build && node packages/studio/dist/bin.mjs studio"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

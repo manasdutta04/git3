@@ -3,7 +3,7 @@ import multer from 'multer';
 import type { Request, Response } from 'express';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ConfigError, Git3 } from 'git3';
+import { ConfigError, Git3 } from '@git3db/db';
 import { createRoutes, type StudioSession } from './routes.js';
 import { writeGit3Env } from './env-file.js';
 

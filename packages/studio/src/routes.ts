@@ -1,4 +1,4 @@
-import { Git3 } from 'git3';
+import { Git3 } from '@git3db/db';
 import type { Request, Response } from 'express';
 
 export interface StudioSession {

@@ -22,15 +22,15 @@ importers:
 
   packages/studio:
     dependencies:
+      '@git3db/db':
+        specifier: workspace:*
+        version: link:../core
       dotenv:
         specifier: ^16.4.7
         version: 16.6.1
       express:
         specifier: ^4.21.2
         version: 4.22.2
-      git3:
-        specifier: workspace:*
-        version: link:../core
       multer:
         specifier: ^2.0.0
         version: 2.2.0
