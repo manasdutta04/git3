@@ -3,6 +3,12 @@
   "version": "0.1.0",
   "description": "Localhost Studio GUI for @git3db/db",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manasdutta04/git3.git",
+    "directory": "packages/studio"
+  },
+  "homepage": "https://github.com/manasdutta04/git3#readme",
   "bin": {
     "git3": "./dist/bin.mjs"
   },
