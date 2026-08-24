@@ -6,29 +6,11 @@ import { fileURLToPath } from 'node:url';
 import { ConfigError, Git3 } from '@git3db/db';
 import { createRoutes, type StudioSession } from './routes.js';
 import { writeGit3Env } from './env-file.js';
-import {
-  fetchGitHubUser,
-  getGitHubClientId,
-  listOwnedRepos,
-  pollDeviceFlow,
-  startDeviceFlow,
-} from './oauth.js';
 
 export interface StudioOptions {
   port: number;
   serveUi: boolean;
   cors: boolean;
-}
-
-interface PendingOAuth {
-  token: string;
-  owner: string;
-}
-
-interface PendingDevice {
-  deviceCode: string;
-  interval: number;
-  expiresAt: number;
 }
 
 function isLocalhost(req: Request): boolean {
@@ -51,117 +33,8 @@ function tryCreateDb(): Git3 | null {
 
 function mountApi(app: Express, session: StudioSession): void {
   const routes = createRoutes(session);
-  let pendingOAuth: PendingOAuth | null = null;
-  let pendingDevice: PendingDevice | null = null;
 
   app.get('/api/status', routes.status);
-
-  app.post('/api/oauth/start', async (req: Request, res: Response) => {
-    if (!isLocalhost(req)) {
-      res.status(403).json({ error: 'OAuth is only allowed from localhost.' });
-      return;
-    }
-    const clientId = getGitHubClientId();
-    if (!clientId) {
-      res.status(400).json({
-        error:
-          'GitHub OAuth is not configured. Set GIT3_GITHUB_CLIENT_ID, or use a personal access token below.',
-      });
-      return;
-    }
-    try {
-      const started = await startDeviceFlow(clientId);
-      pendingDevice = {
-        deviceCode: started.deviceCode,
-        interval: started.interval,
-        expiresAt: Date.now() + started.expiresIn * 1000,
-      };
-      pendingOAuth = null;
-      res.json({
-        userCode: started.userCode,
-        verificationUri: started.verificationUri,
-        interval: started.interval,
-        expiresIn: started.expiresIn,
-      });
-    } catch (err) {
-      res.status(400).json({ error: (err as Error).message });
-    }
-  });
-
-  app.post('/api/oauth/poll', async (req: Request, res: Response) => {
-    if (!isLocalhost(req)) {
-      res.status(403).json({ error: 'OAuth is only allowed from localhost.' });
-      return;
-    }
-    const clientId = getGitHubClientId();
-    if (!clientId || !pendingDevice) {
-      res.status(400).json({ error: 'Start Connect with GitHub first.' });
-      return;
-    }
-    if (Date.now() > pendingDevice.expiresAt) {
-      pendingDevice = null;
-      res.json({ status: 'expired', error: 'Login code expired. Start again.' });
-      return;
-    }
-    try {
-      const result = await pollDeviceFlow(clientId, pendingDevice.deviceCode);
-      if (result.status === 'authorized' && result.accessToken) {
-        const user = await fetchGitHubUser(result.accessToken);
-        pendingOAuth = { token: result.accessToken, owner: user.login };
-        pendingDevice = null;
-        res.json({ status: 'authorized', owner: user.login });
-        return;
-      }
-      res.json(result);
-    } catch (err) {
-      res.status(400).json({ error: (err as Error).message });
-    }
-  });
-
-  app.get('/api/oauth/repos', async (req: Request, res: Response) => {
-    if (!isLocalhost(req)) {
-      res.status(403).json({ error: 'OAuth is only allowed from localhost.' });
-      return;
-    }
-    if (!pendingOAuth) {
-      res.status(401).json({ error: 'Authorize with GitHub first.' });
-      return;
-    }
-    try {
-      const repos = await listOwnedRepos(pendingOAuth.token);
-      res.json({ owner: pendingOAuth.owner, repos });
-    } catch (err) {
-      res.status(400).json({ error: (err as Error).message });
-    }
-  });
-
-  app.post('/api/oauth/finish', async (req: Request, res: Response) => {
-    if (!isLocalhost(req)) {
-      res.status(403).json({ error: 'OAuth is only allowed from localhost.' });
-      return;
-    }
-    if (!pendingOAuth) {
-      res.status(401).json({ error: 'Authorize with GitHub first.' });
-      return;
-    }
-    const repo = String(req.body?.repo || '').trim() || 'my-app-db';
-    const branch = String(req.body?.branch || 'main').trim() || 'main';
-    const { token, owner } = pendingOAuth;
-    try {
-      const db = new Git3({ token, owner, repo, branch });
-      const health = await db.health();
-      writeGit3Env({ token, owner, repo, branch });
-      process.env.GIT3_TOKEN = token;
-      process.env.GIT3_OWNER = owner;
-      process.env.GIT3_REPO = repo;
-      process.env.GIT3_BRANCH = branch;
-      session.db = db;
-      pendingOAuth = null;
-      res.json({ ok: true, health });
-    } catch (err) {
-      res.status(400).json({ error: (err as Error).message });
-    }
-  });
 
   app.post('/api/setup', async (req: Request, res: Response) => {
     if (!isLocalhost(req)) {
@@ -188,8 +61,6 @@ function mountApi(app: Express, session: StudioSession): void {
       process.env.GIT3_REPO = repo;
       process.env.GIT3_BRANCH = branch;
       session.db = db;
-      pendingOAuth = null;
-      pendingDevice = null;
       res.json({ ok: true, health });
     } catch (err) {
       res.status(400).json({ error: (err as Error).message });

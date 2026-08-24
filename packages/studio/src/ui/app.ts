@@ -33,8 +33,6 @@ let documents: Git3Document[] = [];
 let kvData: Record<string, unknown> = {};
 let lastHealth: HealthStatus | null = null;
 let toastTimer = 0;
-let oauthPollTimer = 0;
-let oauthOwner = '';
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id);
@@ -459,135 +457,16 @@ async function uploadFile(event: Event): Promise<void> {
 }
 
 function showConnect(prefill?: { owner?: string; repo?: string }): void {
-  window.clearInterval(oauthPollTimer);
   $('connect').classList.remove('hidden');
-  $('oauth-device').classList.add('hidden');
-  $('oauth-repos').classList.add('hidden');
-  $('token-form').classList.add('hidden');
-  $('oauth-start').classList.remove('hidden');
-  $('connect-error').classList.add('hidden');
   if (prefill?.owner) input('connect-owner').value = prefill.owner;
   if (prefill?.repo) input('connect-repo').value = prefill.repo;
   input('connect-token').value = '';
+  input('connect-token').focus();
 }
 
 function hideConnect(): void {
-  window.clearInterval(oauthPollTimer);
   $('connect').classList.add('hidden');
   $('connect-error').classList.add('hidden');
-}
-
-function showConnectError(message: string): void {
-  const errEl = $('connect-error');
-  errEl.classList.remove('hidden');
-  errEl.textContent = message;
-  errEl.style.borderColor = 'var(--danger)';
-}
-
-async function startOAuth(): Promise<void> {
-  const errEl = $('connect-error');
-  errEl.classList.add('hidden');
-  const btn = $('oauth-start') as HTMLButtonElement;
-  btn.disabled = true;
-  btn.textContent = 'Starting…';
-  try {
-    const started = await api<{
-      userCode: string;
-      verificationUri: string;
-      interval: number;
-    }>('/oauth/start', { method: 'POST', body: '{}' });
-    $('oauth-start').classList.add('hidden');
-    $('oauth-device').classList.remove('hidden');
-    $('oauth-user-code').textContent = started.userCode;
-    const link = $('oauth-verify-link') as HTMLAnchorElement;
-    link.href = started.verificationUri;
-    link.textContent = started.verificationUri.replace(/^https?:\/\//, '');
-    $('oauth-poll-status').textContent = 'Waiting for approval…';
-    window.open(started.verificationUri, '_blank', 'noopener,noreferrer');
-    window.clearInterval(oauthPollTimer);
-    const intervalMs = Math.max(5, started.interval || 5) * 1000;
-    oauthPollTimer = window.setInterval(() => void pollOAuth(), intervalMs);
-    await pollOAuth();
-  } catch (err) {
-    showConnectError((err as Error).message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Connect with GitHub';
-  }
-}
-
-async function pollOAuth(): Promise<void> {
-  try {
-    const result = await api<{
-      status: string;
-      owner?: string;
-      error?: string;
-    }>('/oauth/poll', { method: 'POST', body: '{}' });
-    if (result.status === 'authorized' && result.owner) {
-      window.clearInterval(oauthPollTimer);
-      oauthOwner = result.owner;
-      $('oauth-device').classList.add('hidden');
-      await loadOAuthRepos();
-      return;
-    }
-    if (result.status === 'slow_down') {
-      $('oauth-poll-status').textContent = 'GitHub asked us to slow down… still waiting.';
-      return;
-    }
-    if (result.status === 'pending') {
-      $('oauth-poll-status').textContent = 'Waiting for approval…';
-      return;
-    }
-    window.clearInterval(oauthPollTimer);
-    showConnectError(result.error || 'GitHub login failed');
-    $('oauth-device').classList.add('hidden');
-    $('oauth-start').classList.remove('hidden');
-  } catch (err) {
-    window.clearInterval(oauthPollTimer);
-    showConnectError((err as Error).message);
-    $('oauth-device').classList.add('hidden');
-    $('oauth-start').classList.remove('hidden');
-  }
-}
-
-async function loadOAuthRepos(): Promise<void> {
-  const { owner, repos } = await api<{
-    owner: string;
-    repos: Array<{ name: string; fullName: string; private: boolean }>;
-  }>('/oauth/repos');
-  oauthOwner = owner;
-  const select = $('oauth-repo-select') as HTMLSelectElement;
-  select.innerHTML = [
-    `<option value="">Create new repo below</option>`,
-    ...repos.map(
-      (repo) =>
-        `<option value="${escapeHtml(repo.name)}">${escapeHtml(repo.name)}${repo.private ? '' : ' (public)'}</option>`
-    ),
-  ].join('');
-  input('oauth-repo-new').value = 'my-app-db';
-  $('oauth-repos').classList.remove('hidden');
-}
-
-async function finishOAuth(): Promise<void> {
-  const selected = ($('oauth-repo-select') as HTMLSelectElement).value.trim();
-  const created = input('oauth-repo-new').value.trim();
-  const repo = selected || created || 'my-app-db';
-  const btn = $('oauth-finish') as HTMLButtonElement;
-  btn.disabled = true;
-  btn.textContent = 'Connecting…';
-  try {
-    await api('/oauth/finish', {
-      method: 'POST',
-      body: JSON.stringify({ repo }),
-    });
-    toast(`Connected as ${oauthOwner}/${repo}`);
-    await bootWorkspace();
-  } catch (err) {
-    showConnectError((err as Error).message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Use this repo';
-  }
 }
 
 async function bootWorkspace(): Promise<void> {
@@ -609,16 +488,11 @@ async function boot(): Promise<void> {
   }
 }
 
-$('oauth-start').addEventListener('click', () => void startOAuth());
-$('oauth-finish').addEventListener('click', () => void finishOAuth());
-$('token-toggle').addEventListener('click', () => {
-  $('token-form').classList.toggle('hidden');
-});
-
 $('connect-form').addEventListener('submit', async (event) => {
   event.preventDefault();
+  const errEl = $('connect-error');
   const submit = $('connect-submit') as HTMLButtonElement;
-  $('connect-error').classList.add('hidden');
+  errEl.classList.add('hidden');
   submit.disabled = true;
   submit.textContent = 'Connecting…';
   try {
@@ -633,10 +507,12 @@ $('connect-form').addEventListener('submit', async (event) => {
     toast('Connected');
     await bootWorkspace();
   } catch (err) {
-    showConnectError((err as Error).message);
+    errEl.classList.remove('hidden');
+    errEl.textContent = (err as Error).message;
+    errEl.style.borderColor = 'var(--danger)';
   } finally {
     submit.disabled = false;
-    submit.textContent = 'Connect with token';
+    submit.textContent = 'Connect';
   }
 });
 

@@ -102,62 +102,33 @@
   </div>
 
   <div id="connect" class="connect hidden">
-    <div class="connect-card">
+    <form id="connect-form" class="connect-card">
       <p class="eyebrow">Connect</p>
       <h2>GitHub as your database</h2>
-      <p class="connect-copy">
-        Connect with GitHub. The token is saved in a local <code>.env</code> and never leaves this computer.
+      <p class="connect-copy">Token is saved in a local <code>.env</code> file. It never leaves this computer.</p>
+
+      <label>
+        GitHub token
+        <input id="connect-token" type="password" autocomplete="off" required />
+      </label>
+      <p class="hint">
+        Create a token with the <strong>repo</strong> scope at
+        <a href="https://github.com/settings/tokens" target="_blank" rel="noreferrer">github.com/settings/tokens</a>
       </p>
 
-      <div id="oauth-panel">
-        <button id="oauth-start" class="primary" type="button">Connect with GitHub</button>
-        <div id="oauth-device" class="oauth-device hidden">
-          <p class="hint">Enter this code on GitHub:</p>
-          <p id="oauth-user-code" class="user-code"></p>
-          <p class="hint">
-            Open
-            <a id="oauth-verify-link" href="#" target="_blank" rel="noreferrer">github.com/login/device</a>
-            and approve access.
-          </p>
-          <p id="oauth-poll-status" class="hint">Waiting for approval…</p>
-        </div>
-        <div id="oauth-repos" class="oauth-repos hidden">
-          <label>
-            Data repo
-            <select id="oauth-repo-select"></select>
-          </label>
-          <label>
-            Or create
-            <input id="oauth-repo-new" type="text" placeholder="my-app-db" />
-          </label>
-          <button id="oauth-finish" class="primary" type="button">Use this repo</button>
-        </div>
-      </div>
+      <label>
+        GitHub username
+        <input id="connect-owner" type="text" autocomplete="username" placeholder="your-username" required />
+      </label>
 
-      <button id="token-toggle" class="linkish" type="button">Use a personal access token instead</button>
-
-      <form id="connect-form" class="token-form hidden">
-        <label>
-          GitHub token
-          <input id="connect-token" type="password" autocomplete="off" />
-        </label>
-        <p class="hint">
-          Classic token with the <strong>repo</strong> scope at
-          <a href="https://github.com/settings/tokens" target="_blank" rel="noreferrer">github.com/settings/tokens</a>
-        </p>
-        <label>
-          GitHub username
-          <input id="connect-owner" type="text" autocomplete="username" placeholder="your-username" />
-        </label>
-        <label>
-          Data repo
-          <input id="connect-repo" type="text" placeholder="my-app-db" />
-        </label>
-        <button id="connect-submit" class="primary" type="submit">Connect with token</button>
-      </form>
+      <label>
+        Data repo
+        <input id="connect-repo" type="text" placeholder="my-app-db" />
+      </label>
 
       <p id="connect-error" class="banner hidden" role="alert"></p>
-    </div>
+      <button id="connect-submit" class="primary" type="submit">Connect</button>
+    </form>
   </div>
 
   <div id="toast" class="toast hidden" role="status"></div>

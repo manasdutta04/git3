@@ -155,7 +155,7 @@ export class GitHubClient {
         const body = await create.text();
         if (create.status === 403) {
           throw new AuthenticationError(
-            'This token cannot create repositories. Use Connect with GitHub, a classic token with the repo scope, or create the repo on GitHub first.'
+            'This token cannot create repositories. Use a classic token with the repo scope, or create the repo on GitHub first.'
           );
         }
         throw this.wrapHttpError(create.status, body || create.statusText);

@@ -13,7 +13,7 @@ async function main() {
     console.log(`git3 — free MongoDB-like database on GitHub
 
 Usage:
-  git3 studio    Open the localhost GUI (Connect with GitHub)
+  git3 studio    Open the localhost GUI (connect with your GitHub token there)
   git3 serve     API only for local HTML apps (port 3850)
 
 Keys stay on this machine. Never put GIT3_TOKEN in browser JavaScript.
@@ -23,7 +23,7 @@ Keys stay on this machine. Never put GIT3_TOKEN in browser JavaScript.
 
   if (command === 'serve') {
     if (!Git3.isConfigured()) {
-      console.error('Not connected. Run `npx git3 studio` first, then Connect with GitHub.');
+      console.error('Not connected. Run `npx git3 studio` first and paste your token there.');
       process.exit(1);
     }
     const port = Number(process.env.GIT3_SERVE_PORT || 3850);
