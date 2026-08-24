@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>git3 Studio</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>git3</h1>
+        <p>Studio</p>
+      </div>
+      <div class="health" id="health">Connecting...</div>
+      <h2>Collections</h2>
+      <ul id="collections"></ul>
+      <h2>KV Store</h2>
+      <button id="view-kv" class="ghost">View keys</button>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h2 id="title">Select a collection</h2>
+        <div class="actions">
+          <button id="refresh">Refresh</button>
+          <button id="new-doc" class="primary" disabled>New document</button>
+        </div>
+      </header>
+
+      <section id="table-view">
+        <table>
+          <thead id="table-head"></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </section>
+
+      <section id="editor-view" class="hidden">
+        <textarea id="editor" spellcheck="false"></textarea>
+        <div class="editor-actions">
+          <button id="save-doc" class="primary">Save</button>
+          <button id="delete-doc" class="danger">Delete</button>
+          <button id="cancel-edit">Cancel</button>
+        </div>
+      </section>
+
+      <section id="kv-view" class="hidden">
+        <pre id="kv-content"></pre>
+      </section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
