@@ -25,6 +25,7 @@ export async function startStudio(): Promise<void> {
   app.delete('/api/collections/:name/:id', routes.deleteDocument);
   app.get('/api/kv', routes.listKv);
   app.post('/api/kv', routes.setKv);
+  app.delete('/api/kv/:key', routes.deleteKv);
   app.get('/api/storage', routes.listStorage);
 
   app.get('*', (_req, res) => {

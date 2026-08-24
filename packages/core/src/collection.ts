@@ -195,6 +195,12 @@ export class Collection<T extends Git3Document = Git3Document> {
     const cursor = new FindCursor<T>([]);
 
     const loadDocs = async (): Promise<T[]> => {
+      const idFilter = (filter as Record<string, unknown>)._id;
+      if (typeof idFilter === 'string') {
+        const byId = await self.findById(idFilter);
+        return byId && matchesFilter(byId, filter) ? [byId] : [];
+      }
+
       const { index } = await self.loadIndex();
       const candidateIds = indexMatchesFilter(index, filter as Filter<Git3Document>);
 

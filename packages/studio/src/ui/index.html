@@ -4,52 +4,103 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>git3 Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
+  <div class="grain" aria-hidden="true"></div>
   <div class="app">
     <aside class="sidebar">
       <div class="brand">
-        <h1>git3</h1>
-        <p>Studio</p>
+        <span class="mark">g3</span>
+        <div>
+          <h1>git3</h1>
+          <p>studio</p>
+        </div>
       </div>
-      <div class="health" id="health">Connecting...</div>
-      <h2>Collections</h2>
-      <ul id="collections"></ul>
-      <h2>KV Store</h2>
-      <button id="view-kv" class="ghost">View keys</button>
+
+      <div class="health" id="health">
+        <span class="pulse"></span>
+        Connecting to GitHub…
+      </div>
+
+      <div class="nav-block">
+        <div class="nav-head">
+          <h2>Collections</h2>
+          <button id="new-collection" class="icon-btn" title="New collection">+</button>
+        </div>
+        <ul id="collections"></ul>
+        <p id="collections-empty" class="hint hidden">No collections yet. Create one to start storing documents.</p>
+      </div>
+
+      <div class="nav-block">
+        <h2>Also</h2>
+        <button id="view-kv" class="nav-btn" type="button">Key-value store</button>
+        <button id="view-storage" class="nav-btn" type="button">File storage</button>
+      </div>
+
+      <p class="foot-note">Data lives in your private GitHub repo. Studio never leaves this machine.</p>
     </aside>
 
     <main class="content">
-      <header>
-        <h2 id="title">Select a collection</h2>
-        <div class="actions">
-          <button id="refresh">Refresh</button>
-          <button id="new-doc" class="primary" disabled>New document</button>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="eyebrow">Workspace</p>
+          <h2 id="title">Select a collection</h2>
+        </div>
+        <div class="actions" id="table-actions">
+          <input id="search" type="search" placeholder="Filter documents…" disabled />
+          <button id="refresh" type="button">Refresh</button>
+          <button id="new-doc" class="primary" type="button" disabled>New document</button>
         </div>
       </header>
 
+      <p id="banner" class="banner hidden" role="status"></p>
+
       <section id="table-view">
-        <table>
-          <thead id="table-head"></thead>
-          <tbody id="table-body"></tbody>
-        </table>
+        <div class="table-wrap">
+          <table>
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div id="empty-state" class="empty hidden">
+          <h3>No documents yet</h3>
+          <p>This collection is empty. Insert a JSON document and git3 will commit it to GitHub.</p>
+          <button id="empty-new" class="primary" type="button">Create the first document</button>
+        </div>
       </section>
 
       <section id="editor-view" class="hidden">
-        <textarea id="editor" spellcheck="false"></textarea>
+        <div class="editor-meta">
+          <span id="editor-label">Document JSON</span>
+          <span class="muted" id="editor-id"></span>
+        </div>
+        <textarea id="editor" spellcheck="false" aria-label="Document JSON"></textarea>
         <div class="editor-actions">
-          <button id="save-doc" class="primary">Save</button>
-          <button id="delete-doc" class="danger">Delete</button>
-          <button id="cancel-edit">Cancel</button>
+          <button id="save-doc" class="primary" type="button">Save to GitHub</button>
+          <button id="delete-doc" class="danger" type="button">Delete</button>
+          <button id="cancel-edit" type="button">Back</button>
         </div>
       </section>
 
       <section id="kv-view" class="hidden">
-        <pre id="kv-content"></pre>
+        <div class="kv-form">
+          <input id="kv-key" type="text" placeholder="key" />
+          <input id="kv-value" type="text" placeholder='value (JSON or text)' />
+          <button id="kv-save" class="primary" type="button">Set</button>
+        </div>
+        <div id="kv-list" class="kv-list"></div>
+      </section>
+
+      <section id="storage-view" class="hidden">
+        <div id="storage-list" class="file-list"></div>
       </section>
     </main>
   </div>
+  <div id="toast" class="toast hidden" role="status"></div>
   <script src="/app.js"></script>
 </body>
 </html>

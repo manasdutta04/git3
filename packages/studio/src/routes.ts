@@ -93,6 +93,16 @@ export function createRoutes(db: Git3) {
       }
     },
 
+    deleteKv: async (req: Request, res: Response) => {
+      try {
+        const key = req.params.key!;
+        await db.kv().delete(key);
+        res.json({ ok: true });
+      } catch (err) {
+        res.status(400).json({ error: (err as Error).message });
+      }
+    },
+
     listStorage: async (req: Request, res: Response) => {
       try {
         const prefix = (req.query.prefix as string) || '';

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { config } from 'dotenv';
 import open from 'open';
 import { startStudio } from './server.js';
