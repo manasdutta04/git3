@@ -42,15 +42,22 @@ export class FileStorage {
 
   async list(prefix = ''): Promise<StorageFileInfo[]> {
     const dir = prefix ? `${this.basePath}/${prefix.replace(/^\/+/, '')}` : this.basePath;
-    const entries = await this.github.listDirectory(dir);
-    return entries.map((e) => ({
-      name: e.name,
-      path: e.path.replace(`${this.basePath}/`, ''),
-      size: e.size,
-      sha: e.sha,
-      downloadUrl: null,
-      type: e.type === 'dir' ? 'dir' : 'file',
-    }));
+    try {
+      const blobs = await this.github.listBlobs(dir);
+      return blobs.map((entry) => {
+        const relative = entry.path.replace(`${this.basePath}/`, '');
+        return {
+          name: relative.split('/').pop() || relative,
+          path: relative,
+          size: entry.size,
+          sha: entry.sha,
+          downloadUrl: null,
+          type: 'file' as const,
+        };
+      });
+    } catch {
+      return [];
+    }
   }
 
   async exists(path: string): Promise<boolean> {

@@ -1,4 +1,5 @@
 import express from 'express';
+import multer from 'multer';
 import type { Request, Response } from 'express';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -70,6 +71,11 @@ export async function startStudio(): Promise<void> {
     }
   });
 
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 },
+  });
+
   app.get('/api/health', routes.health);
   app.get('/api/collections', routes.listCollections);
   app.get('/api/collections/:name', routes.listDocuments);
@@ -80,10 +86,21 @@ export async function startStudio(): Promise<void> {
   app.get('/api/kv', routes.listKv);
   app.post('/api/kv', routes.setKv);
   app.delete('/api/kv/:key', routes.deleteKv);
+  app.get('/api/storage/file', routes.downloadStorage);
   app.get('/api/storage', routes.listStorage);
+  app.post('/api/storage', upload.single('file'), routes.uploadStorage);
+  app.delete('/api/storage', routes.deleteStorage);
 
   app.get('*', (_req, res) => {
     res.sendFile(join(uiPath, 'index.html'));
+  });
+
+  app.use((err: Error, _req: Request, res: Response, _next: () => void) => {
+    if (err.name === 'MulterError') {
+      res.status(400).json({ error: err.message === 'File too large' ? 'File must be 10MB or smaller.' : err.message });
+      return;
+    }
+    res.status(500).json({ error: err.message });
   });
 
   await new Promise<void>((resolve) => {

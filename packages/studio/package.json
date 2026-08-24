@@ -10,17 +10,19 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup && node scripts/copy-ui.mjs",
+    "build": "node scripts/clean.mjs && tsup && node scripts/copy-ui.mjs",
     "dev": "tsup --watch"
   },
   "dependencies": {
     "git3": "workspace:*",
     "express": "^4.21.2",
+    "multer": "^2.0.0",
     "open": "^10.1.0",
     "dotenv": "^16.4.7"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0"
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12"
   },
   "engines": {
     "node": ">=18.0.0"

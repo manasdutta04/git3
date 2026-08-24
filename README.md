@@ -49,7 +49,16 @@ MongoDB-style methods still work: `insertOne`, `findOne`, `updateOne({ $set })`,
 | `set` / `updateOne` | Update fields |
 | `remove` / `deleteOne` | Delete |
 | `db.kv()` | Key-value |
-| `db.storage()` | Files |
+| `db.storage()` | Files (PNG, PDF, …) |
+
+**Documents vs files:** collections store JSON. Images and other binaries go in `storage/`.
+
+```ts
+await db.storage().upload('avatars/ada.png', pngBuffer);
+const bytes = await db.storage().download('avatars/ada.png');
+```
+
+In Studio, open **Files** to upload, preview images, and delete (10MB max).
 
 ### Query operators
 

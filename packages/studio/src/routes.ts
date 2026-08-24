@@ -154,5 +154,78 @@ export function createRoutes(session: StudioSession) {
         res.status(500).json({ error: (err as Error).message });
       }
     },
+
+    downloadStorage: async (req: Request, res: Response) => {
+      const db = needsDb(session, res);
+      if (!db) return;
+      try {
+        const path = String(req.query.path || '').replace(/^\/+/, '');
+        if (!path || path.includes('..')) {
+          res.status(400).json({ error: 'Invalid path' });
+          return;
+        }
+        const buf = await db.storage().download(path);
+        res.setHeader('Content-Type', contentTypeFor(path));
+        res.setHeader('Content-Disposition', `inline; filename="${path.split('/').pop()}"`);
+        res.send(buf);
+      } catch (err) {
+        res.status(404).json({ error: (err as Error).message });
+      }
+    },
+
+    uploadStorage: async (req: Request, res: Response) => {
+      const db = needsDb(session, res);
+      if (!db) return;
+      try {
+        const file = (req as Request & { file?: Express.Multer.File }).file;
+        if (!file) {
+          res.status(400).json({ error: 'No file uploaded' });
+          return;
+        }
+        const requested = String(req.body?.path || '').trim();
+        const path = (requested || file.originalname).replace(/^\/+/, '');
+        if (!path || path.includes('..')) {
+          res.status(400).json({ error: 'Invalid path' });
+          return;
+        }
+        await db.storage().upload(path, file.buffer);
+        res.status(201).json({ ok: true, path });
+      } catch (err) {
+        res.status(400).json({ error: (err as Error).message });
+      }
+    },
+
+    deleteStorage: async (req: Request, res: Response) => {
+      const db = needsDb(session, res);
+      if (!db) return;
+      try {
+        const path = String(req.query.path || '').replace(/^\/+/, '');
+        if (!path || path.includes('..')) {
+          res.status(400).json({ error: 'Invalid path' });
+          return;
+        }
+        await db.storage().delete(path);
+        res.json({ ok: true });
+      } catch (err) {
+        res.status(400).json({ error: (err as Error).message });
+      }
+    },
   };
+}
+
+function contentTypeFor(path: string): string {
+  const ext = path.split('.').pop()?.toLowerCase();
+  const map: Record<string, string> = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    webp: 'image/webp',
+    svg: 'image/svg+xml',
+    pdf: 'application/pdf',
+    json: 'application/json',
+    txt: 'text/plain',
+    csv: 'text/csv',
+  };
+  return map[ext || ''] || 'application/octet-stream';
 }

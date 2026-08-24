@@ -491,6 +491,32 @@ export class GitHubClient {
     return entries;
   }
 
+  async listBlobs(dirPath: string): Promise<Array<{ path: string; sha: string; size: number }>> {
+    await this.ensureReady();
+    const start = Date.now();
+    const refRes = await this.request(
+      `/repos/${this.config.owner}/${this.config.repo}/git/ref/heads/${this.config.branch}`
+    );
+    if (!refRes.ok) throw this.wrapHttpError(refRes.status, await refRes.text());
+    const refData = (await refRes.json()) as { object: { sha: string } };
+
+    const treeRes = await this.request(
+      `/repos/${this.config.owner}/${this.config.repo}/git/trees/${refData.object.sha}?recursive=1`
+    );
+    if (!treeRes.ok) throw this.wrapHttpError(treeRes.status, await treeRes.text());
+    const fullTree = (await treeRes.json()) as {
+      tree: Array<{ path?: string; type?: string; sha?: string; size?: number }>;
+    };
+
+    const prefix = dirPath.endsWith('/') ? dirPath : `${dirPath}/`;
+    const entries = fullTree.tree
+      .filter((entry) => entry.type === 'blob' && entry.path?.startsWith(prefix))
+      .map((entry) => ({ path: entry.path!, sha: entry.sha!, size: entry.size ?? 0 }));
+
+    this.logger.api('TREE', dirPath, `${entries.length} files`, Date.now() - start);
+    return entries;
+  }
+
   async getBlob(sha: string): Promise<string> {
     const response = await this.request(
       `/repos/${this.config.owner}/${this.config.repo}/git/blobs/${sha}`
